@@ -44,7 +44,7 @@ Or install it yourself as:
 
       preferences do
 
-        preference :taxable data_type: :boolean, required: true, default: "true"
+        preference :taxable data_type: :boolean, required: true, default: true
         preference :vat_no required: false
         preference :max_invoice_items data_type: :integer
 

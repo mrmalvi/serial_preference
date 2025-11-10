@@ -1,8 +1,6 @@
-# frozen_string_literal: true
-
 module SerialPreference
   class PreferenceDefinition
-    SUPPORTED_TYPES = %i[string integer decimal float boolean].freeze
+    SUPPORTED_TYPES = [:string,:integer,:decimal,:float,:boolean]
 
     attr_accessor :data_type, :name, :default, :required, :field_type
 
@@ -30,15 +28,15 @@ module SerialPreference
     end
 
     def default_value
-      @default
+      default
     end
 
     def required?
-      @required
+      required
     end
 
     def numerical?
-      %i[integer float decimal].include?(data_type)
+      [:integer, :float, :decimal].include?(data_type)
     end
 
     def boolean?
@@ -47,8 +45,8 @@ module SerialPreference
 
     # Cast a value using ActiveModel type system
     def type_cast(value)
-      casted_value = @type.cast(value)
-      casted_value.nil? ? default_value : casted_value
+      v = @type.cast(value)
+      v.nil? ? default_value : v
     end
 
     # Used for UI field mapping, default to string for numeric fields
