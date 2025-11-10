@@ -25,3 +25,8 @@ appraise "rails-6" do
   gem "activesupport", "6.0.0"
   gem "activerecord", "6.0.0"
 end
+
+appraise "rails-7" do
+  gem "activesupport", "~> 7.0.0"
+  gem "activerecord", "~> 7.0.0"
+end

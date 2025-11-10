@@ -1,3 +1,4 @@
+require "rails"
 module SerialPreference
   module HasSerialPreferences
     extend ActiveSupport::Concern
@@ -32,7 +33,11 @@ module SerialPreference
       private
 
       def build_preference_definitions
-        serialize self._preferences_attribute, Hash
+        if Gem::Version.new(Rails.version) >= Gem::Version.new("7.1")
+          serialize self._preferences_attribute, coder: SerialPreference::SafeYamlCoder, type: Hash
+        else
+          serialize self._preferences_attribute, Hash
+        end
 
         _preference_map.all_preference_definitions.each do |preference|
 
