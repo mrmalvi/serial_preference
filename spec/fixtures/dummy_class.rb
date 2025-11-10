@@ -1,7 +1,7 @@
 class DummyClass < ActiveRecord::Base
   include SerialPreference::HasSerialPreferences
   preferences do
-    preference :taxable, data_type: :boolean, required: true, default: true
+    preference :taxable, data_type: :boolean, required: true, default: "true"
     preference :required_number, data_type: :integer, required: :true
     preference :vat_no, required: false
     preference :max_invoice_items, data_type: :integer

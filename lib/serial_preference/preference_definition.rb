@@ -1,105 +1,101 @@
+# frozen_string_literal: true
+
 module SerialPreference
   class PreferenceDefinition
-
-    SUPPORTED_TYPES = [:string,:integer,:decimal,:float,:boolean]
+    SUPPORTED_TYPES = %i[string integer decimal float boolean].freeze
 
     attr_accessor :data_type, :name, :default, :required, :field_type
 
-    def initialize(name,*args)
+    def initialize(name, *args)
       opts = args.extract_options!
-      self.name = name.to_s
-      opts.assert_valid_keys(:data_type,:default,:required,:field_type)
-      self.data_type = @type = opts[:data_type] || :string
-      @column = ActiveRecord::ConnectionAdapters::Column.new(name.to_s, opts[:default], column_type(@type))
-      self.default = opts[:default]
-      self.required = !!opts[:required]
+      opts.assert_valid_keys(:data_type, :default, :required, :field_type)
+
+      self.name       = name.to_s
+      self.data_type  = opts[:data_type]&.to_sym || :string
+      self.default    = opts[:default]
+      self.required   = !!opts[:required]
       self.field_type = opts[:field_type]
+
+      # Use ActiveModel::Type for consistent casting across Rails versions
+      begin
+        @type = ActiveModel::Type.lookup(self.data_type)
+      rescue ArgumentError
+        @type = ActiveModel::Type::Value.new
+      end
     end
 
+    # Return the name of the preference
     def name
-      @column.name
+      @name
     end
 
     def default_value
-      @column.default
+      @default
     end
 
     def required?
-      required
+      @required
     end
 
     def numerical?
-      [:integer, :float, :decimal].include?(@column.type)
+      %i[integer float decimal].include?(data_type)
     end
 
     def boolean?
-      @column.type == :boolean
+      data_type == :boolean
     end
 
+    # Cast a value using ActiveModel type system
     def type_cast(value)
-      v = @column.type_cast(value)
-      v.nil? ? default_value : v
+      casted_value = @type.cast(value)
+      casted_value.nil? ? default_value : casted_value
     end
 
+    # Used for UI field mapping, default to string for numeric fields
     def field_type
       @field_type || (numerical? ? :string : data_type)
     end
 
+    # Check if a given value is "truthy" for queries
     def query(value)
-      if !(value = type_cast(value))
-        false
-      elsif numerical?
-        !value.zero?
+      value = type_cast(value)
+      return false if value.nil?
+
+      if numerical?
+        !value.to_f.zero?
       else
         !value.blank?
       end
     end
 
+    # Value coercion used for serialization
     def value(v)
       v = v.nil? ? default : v
-      if !v.nil?
-        case data_type
-        when :string, :password
-          v.to_s
-        when  :integer
-          v.respond_to?(:to_i) ? v.to_i : nil
-        when :float, :real
-          v.respond_to?(:to_f) ? v.to_f : nil
-        when :boolean
-          return false if v == 0
-          return false if v == ""
-          return false if v == nil
-          return false if v.to_s.downcase == "false"
-          return false if v == "0"
-          return false if v.to_s.downcase == "no"
-          !!v
-        else
-          nil
-        end
-      end
-    end
+      return nil if v.nil?
 
-    def column_type(type)
-      if greater_or_equal_rails_42?
-        case type
-        when :boolean
-          ActiveRecord::Type::Boolean.new
-        when :integer
-          ActiveRecord::Type::Integer.new
-        when :float
-          ActiveRecord::Type::Float.new
-        when :decimal
-          ActiveRecord::Type::Decimal.new
-        else
-          ActiveRecord::Type::String.new
-        end
+      case data_type
+      when :string, :password
+        v.to_s
+      when :integer
+        v.is_a?(Integer) ? v : v.try(:to_i)
+      when :float, :real, :decimal
+        v.is_a?(Numeric) ? v.to_f : v.try(:to_f)
+      when :boolean
+        boolean_cast(v)
       else
-        type.to_s
+        v
       end
     end
 
-    def greater_or_equal_rails_42?
-      ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR == 2)
+    private
+
+    def boolean_cast(v)
+      return v if !v
+      if v.is_a?(String)
+        return false if v.downcase == "no"
+      end
+
+      ActiveModel::Type::Boolean.new.cast(v.to_s.downcase)
     end
   end
 end
