@@ -1,7 +1,16 @@
 module SerialPreference
   module SafeYamlCoder
+    SAFE_CLASSES = [
+      Symbol,
+      Date,
+      Time,
+      DateTime,
+      BigDecimal,
+      ActiveSupport::TimeWithZone,
+      ActiveSupport::HashWithIndifferentAccess
+    ].freeze
+
     def self.dump(obj)
-      obj = obj.to_h if obj.is_a?(ActiveSupport::HashWithIndifferentAccess)
       YAML.dump(obj)
     end
 
@@ -9,7 +18,7 @@ module SerialPreference
       return {} if yaml.blank?
       Psych.safe_load(
         yaml,
-        permitted_classes: [Symbol, ActiveSupport::HashWithIndifferentAccess, Date, Time],
+        permitted_classes: SAFE_CLASSES,
         aliases: true
       ) || {}
     rescue Psych::Exception
