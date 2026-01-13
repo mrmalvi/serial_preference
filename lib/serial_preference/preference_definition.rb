@@ -17,7 +17,7 @@ module SerialPreference
     end
 
     def default_value
-      default
+      type_cast(default)
     end
 
     def required?
