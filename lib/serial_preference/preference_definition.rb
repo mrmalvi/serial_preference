@@ -29,7 +29,7 @@ module SerialPreference
     end
 
     def boolean?
-      data_type == :boolean
+      data_type.type == :boolean
     end
 
     def type_cast(value)
