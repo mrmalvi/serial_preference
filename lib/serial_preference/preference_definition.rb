@@ -25,7 +25,7 @@ module SerialPreference
     end
 
     def numerical?
-      [:integer, :float, :decimal].include?(data_type)
+      [:integer, :float, :decimal].include?(@type_caster.type)
     end
 
     def boolean?
