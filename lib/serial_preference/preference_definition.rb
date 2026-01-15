@@ -10,7 +10,7 @@ module SerialPreference
       self.name = name.to_s
       opts.assert_valid_keys(:data_type, :default, :required, :field_type)
       self.data_type = @type = opts[:data_type] || :string
-      @type_caster = column_type(@type)
+      @column = column_type(@type)
       self.default = opts[:default]
       self.required = !!opts[:required]
       self.field_type = opts[:field_type]
@@ -25,15 +25,15 @@ module SerialPreference
     end
 
     def numerical?
-      [:integer, :float, :decimal].include?(@type_caster.type)
+      [:integer, :float, :decimal].include?(@column.type)
     end
 
     def boolean?
-      @type_caster.type == :boolean
+      @column.type == :boolean
     end
 
     def type_cast(value)
-      v = @type_caster.cast(value)
+      v = @column.cast(value)
       v.nil? ? default_value : v
     end
 
