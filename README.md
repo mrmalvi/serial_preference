@@ -17,10 +17,6 @@ and other niceties.
 
 Scratching my own itch.
 
-## Rails 6 & 7 changes
-
-For boolean fields default value should be given as `"true"` `"false"` with quotes
-
 ## Installation
 
 Add this line to your application's Gemfile:
