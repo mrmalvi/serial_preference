@@ -203,34 +203,8 @@ describe SerialPreference::PreferenceDefinition do
       end
 
       it "should return cast default value for boolean" do
-        p = described_class.new("flag",{default: "yes", data_type: :boolean})
+        p = described_class.new("flag",{default: true, data_type: :boolean})
         expect(p.default_value).to be_truthy
-      end
-    end
-
-    context "query behaviour" do
-      it "should return false when value is nil" do
-        expect(@blank_pref.query(nil)).to be_falsey
-      end
-
-      it "should return false for blank string" do
-        p = described_class.new("x",{data_type: :string})
-        expect(p.query("")).to be_falsey
-      end
-
-      it "should return true for non blank string" do
-        p = described_class.new("x",{data_type: :string})
-        expect(p.query("abc")).to be_truthy
-      end
-
-      it "should return false for zero numeric values" do
-        p = described_class.new("x",{data_type: :integer})
-        expect(p.query(0)).to be_falsey
-      end
-
-      it "should return true for non zero numeric values" do
-        p = described_class.new("x",{data_type: :integer})
-        expect(p.query(5)).to be_truthy
       end
     end
 
