@@ -75,7 +75,7 @@ module SerialPreference
       begin
         ActiveModel::Type.lookup(type)
       rescue ArgumentError
-        ActiveRecord::Type::String.new
+        ActiveModel::Type::String.new
       end
     end
 
