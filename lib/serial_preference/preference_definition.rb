@@ -17,7 +17,7 @@ module SerialPreference
     end
 
     def default_value
-      type_cast(default)
+      @column.cast(default)
     end
 
     def required?
