@@ -179,6 +179,120 @@ describe SerialPreference::PreferenceDefinition do
       end
     end
 
+    context "boolean? behaviour" do
+      it "should be boolean when data_type is boolean" do
+        p = described_class.new("whatever",{data_type: :boolean})
+        expect(p.boolean?).to be_truthy
+      end
+
+      it "should not be boolean for non boolean data types" do
+        [:string, :integer, :float, :decimal, :password, :xyz].each do |dt|
+          expect(described_class.new("whatever",{data_type: dt}).boolean?).to be_falsey
+        end
+      end
+    end
+
+    context "default_value behaviour" do
+      it "should return nil when no default is set" do
+        expect(@blank_pref.default_value).to be_nil
+      end
+
+      it "should return cast default value for integer" do
+        p = described_class.new("num",{default: "12", data_type: :integer})
+        expect(p.default_value).to eq(12)
+      end
+
+      it "should return cast default value for boolean" do
+        p = described_class.new("flag",{default: "yes", data_type: :boolean})
+        expect(p.default_value).to be_truthy
+      end
+    end
+
+    context "query behaviour" do
+      it "should return false when value is nil" do
+        expect(@blank_pref.query(nil)).to be_falsey
+      end
+
+      it "should return false for blank string" do
+        p = described_class.new("x",{data_type: :string})
+        expect(p.query("")).to be_falsey
+      end
+
+      it "should return true for non blank string" do
+        p = described_class.new("x",{data_type: :string})
+        expect(p.query("abc")).to be_truthy
+      end
+
+      it "should return false for zero numeric values" do
+        p = described_class.new("x",{data_type: :integer})
+        expect(p.query(0)).to be_falsey
+      end
+
+      it "should return true for non zero numeric values" do
+        p = described_class.new("x",{data_type: :integer})
+        expect(p.query(5)).to be_truthy
+      end
+    end
+
+    context "column_type behaviour" do
+      it "should lookup ActiveModel type when supported" do
+        p = described_class.new("x",{data_type: :integer})
+        expect(p.instance_variable_get(:@column).type).to eq(:integer)
+      end
+
+      it "should fallback to string type when unsupported" do
+        p = described_class.new("x",{data_type: :unknown})
+        expect(p.instance_variable_get(:@column)).to be_a(ActiveModel::Type::String)
+      end
+    end
+
+    context "normalize_boolean behaviour" do
+      before do
+        @bool = described_class.new("flag",{data_type: :boolean})
+      end
+
+      it "should treat 'yes' as true" do
+        expect(@bool.send(:normalize_boolean, "yes")).to be_truthy
+      end
+
+      it "should treat 'no' as false" do
+        expect(@bool.send(:normalize_boolean, "no")).to be_falsey
+      end
+
+      it "should treat mixed case truthy as true" do
+        expect(@bool.send(:normalize_boolean, "YeS")).to be_truthy
+      end
+
+      it "should treat mixed case falsy as false" do
+        expect(@bool.send(:normalize_boolean, "No")).to be_falsey
+      end
+
+      it "should treat numeric zero as false" do
+        expect(@bool.send(:normalize_boolean, 0)).to be_falsey
+      end
+
+      it "should treat numeric non-zero as true" do
+        expect(@bool.send(:normalize_boolean, 42)).to be_truthy
+      end
+    end
+
+    context "value method edge cases" do
+      it "should return default when value is nil and default exists" do
+        p = described_class.new("color",{default: "red"})
+        expect(p.value(nil)).to eq("red")
+      end
+
+      it "should handle boolean strings properly" do
+        p = described_class.new("flag",{data_type: :boolean})
+        expect(p.value("true")).to be_truthy
+        expect(p.value("false")).to be_falsey
+      end
+
+      it "should not coerce non boolean types into boolean" do
+        p = described_class.new("mode",{data_type: :string})
+        expect(p.value("false")).to eq("false")
+      end
+    end
   end
 
 end
