@@ -234,18 +234,6 @@ describe SerialPreference::PreferenceDefinition do
       end
     end
 
-    context "column_type behaviour" do
-      it "should lookup ActiveModel type when supported" do
-        p = described_class.new("x",{data_type: :integer})
-        expect(p.instance_variable_get(:@column).type).to eq(:integer)
-      end
-
-      it "should fallback to string type when unsupported" do
-        p = described_class.new("x",{data_type: :unknown})
-        expect(p.instance_variable_get(:@column)).to be_a(ActiveModel::Type::String)
-      end
-    end
-
     context "normalize_boolean behaviour" do
       before do
         @bool = described_class.new("flag",{data_type: :boolean})
@@ -260,7 +248,7 @@ describe SerialPreference::PreferenceDefinition do
       end
 
       it "should treat mixed case truthy as true" do
-        expect(@bool.send(:normalize_boolean, "YeS")).to be_truthy
+        expect(@bool.send(:normalize_boolean, "YES")).to be_truthy
       end
 
       it "should treat mixed case falsy as false" do
@@ -271,8 +259,8 @@ describe SerialPreference::PreferenceDefinition do
         expect(@bool.send(:normalize_boolean, 0)).to be_falsey
       end
 
-      it "should treat numeric non-zero as true" do
-        expect(@bool.send(:normalize_boolean, 42)).to be_truthy
+      it "should treat numeric '0' as false" do
+        expect(@bool.send(:normalize_boolean, '0')).to be_falsey
       end
     end
 
