@@ -247,11 +247,11 @@ describe SerialPreference::PreferenceDefinition do
         expect(@bool.send(:normalize_boolean, "no")).to be_falsey
       end
 
-      it "should treat mixed case truthy as true" do
+      it "should treat 'YES' as true" do
         expect(@bool.send(:normalize_boolean, "YES")).to be_truthy
       end
 
-      it "should treat mixed case falsy as false" do
+      it "should treat 'No' as false" do
         expect(@bool.send(:normalize_boolean, "No")).to be_falsey
       end
 
