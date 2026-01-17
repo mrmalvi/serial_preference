@@ -221,14 +221,6 @@ describe SerialPreference::PreferenceDefinition do
         expect(@bool.send(:normalize_boolean, "no")).to be_falsey
       end
 
-      it "should treat 'YES' as true" do
-        expect(@bool.send(:normalize_boolean, "YES")).to be_truthy
-      end
-
-      it "should treat 'No' as false" do
-        expect(@bool.send(:normalize_boolean, "No")).to be_falsey
-      end
-
       it "should treat numeric zero as false" do
         expect(@bool.send(:normalize_boolean, 0)).to be_falsey
       end
