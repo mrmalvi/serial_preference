@@ -1,4 +1,3 @@
-require "rails"
 module SerialPreference
   module HasSerialPreferences
     extend ActiveSupport::Concern
@@ -33,7 +32,7 @@ module SerialPreference
       private
 
       def build_preference_definitions
-        if Gem::Version.new(Rails.version) >= Gem::Version.new("7.1")
+        if serialize_supports_coder?
           serialize self._preferences_attribute, coder: SerialPreference::SafeYamlCoder, type: Hash
         else
           serialize self._preferences_attribute, Hash
@@ -60,6 +59,12 @@ module SerialPreference
 
         end
       end
+
+      def serialize_supports_coder?
+        defined?(ActiveRecord::Base) &&
+          ActiveRecord::Base.respond_to?(:serialize) &&
+          ActiveRecord::Base.method(:serialize).parameters.any? { |p| p.include?(:coder) }
+      end
     end
 
     protected
@@ -76,6 +81,5 @@ module SerialPreference
         attribute[key.to_sym] = value
       end
     end
-
   end
 end
