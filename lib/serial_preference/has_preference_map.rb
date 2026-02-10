@@ -61,8 +61,7 @@ module SerialPreference
       end
 
       def serialize_supports_coder?
-        defined?(ActiveRecord::Base) &&
-          ActiveRecord::Base.respond_to?(:serialize) &&
+        ActiveRecord::Base.respond_to?(:serialize) &&
           ActiveRecord::Base.method(:serialize).parameters.any? { |p| p.include?(:coder) }
       end
     end
