@@ -16,8 +16,12 @@ module SerialPreference
       self.field_type = opts[:field_type]
     end
 
+    def name
+      @column.respond_to?(:name) ? @column.name : @name
+    end
+
     def default_value
-      @column.respond_to?(:default) ? @column.default : default
+      @column.respond_to?(:default) ? @column.default : @default
     end
 
     def required?
