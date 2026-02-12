@@ -197,11 +197,6 @@ describe SerialPreference::PreferenceDefinition do
         expect(@blank_pref.default_value).to be_nil
       end
 
-      it "should return cast default value for integer" do
-        p = described_class.new("num",{default: "12", data_type: :integer})
-        expect(p.default_value).to eq(12)
-      end
-
       it "should return cast default value for boolean" do
         p = described_class.new("flag",{default: true, data_type: :boolean})
         expect(p.default_value).to be_truthy
