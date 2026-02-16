@@ -21,7 +21,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "activerecord", ">= 3.0.0"
 
   gem.add_development_dependency 'sqlite3'
-  gem.add_development_dependency 'debug'
   gem.add_development_dependency 'rspec', ">= 3.0.0"
   gem.add_development_dependency 'rspec-rails'
   gem.add_development_dependency "shoulda"

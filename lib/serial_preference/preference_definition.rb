@@ -10,7 +10,7 @@ module SerialPreference
       self.name = name.to_s
       opts.assert_valid_keys(:data_type, :default, :required, :field_type)
       self.data_type = @type = opts[:data_type] || :string
-      @column = rails_below_6? ? ActiveRecord::ConnectionAdapters::Column.new(name.to_s, opts[:default], column_type(@type)) : column_type(@type)
+      @column = below_rails_7? ? ActiveRecord::ConnectionAdapters::Column.new(name.to_s, opts[:default], column_type(@type)) : column_type(@type)
       self.default = opts[:default]
       self.required = !!opts[:required]
       self.field_type = opts[:field_type]
@@ -76,14 +76,14 @@ module SerialPreference
     private
 
     def column_type(type)
-      if rails_below_6?
-        column_type_below_6(type)
+      if below_rails_7?
+        column_type_below_rails_7(type)
       else
-        column_type_greater_6(type)
+        column_type_greater_or_equal_rails_7(type)
       end
     end
 
-    def column_type_greater_6(type)
+    def column_type_greater_or_equal_rails_7(type)
       begin
         ActiveModel::Type.lookup(type)
       rescue ArgumentError
@@ -91,7 +91,7 @@ module SerialPreference
       end
     end
 
-    def column_type_below_6(type)
+    def column_type_below_rails_7(type)
       if greater_or_equal_rails_42?
         case type
         when :boolean
@@ -111,11 +111,16 @@ module SerialPreference
     end
 
     def normalize_boolean(v)
-      if rails_below_6?
-        return false if ["", "0", "false", "no"].include?(v.to_s.downcase)
+      if below_rails_7?
+        return false if v == 0
+        return false if v == ""
+        return false if v == nil
+        return false if v.to_s.downcase == "false"
+        return false if v == "0"
+        return false if v.to_s.downcase == "no"
         v
       else
-        return false if !v || (v.is_a?(String) && (v.downcase == "no"))
+        return false if !v || v.to_s.downcase == "no"
         ActiveModel::Type::Boolean.new.cast(v.to_s.downcase)
       end
     end
@@ -124,8 +129,8 @@ module SerialPreference
       ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR == 2)
     end
 
-    def rails_below_6?
-      ActiveRecord::VERSION::MAJOR < 6
+    def below_rails_7?
+      ActiveRecord::VERSION::MAJOR < 7
     end
   end
 end

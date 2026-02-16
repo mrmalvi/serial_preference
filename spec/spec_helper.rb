@@ -4,7 +4,6 @@ require 'active_support/all'
 require 'active_record'
 require 'yaml'
 require 'rspec'
-require 'debug'
 require 'shoulda'
 require "serial_preference/version"
 require 'serial_preference/preference_definition'
